@@ -1,5 +1,5 @@
 import numpy as np
-data=[[0,1,1,0],[1,0,1,0],[1,1,0,0],[0,0,0,0]]
+data=[[0,0,1,0],[0,0,1,0],[1,1,0,0],[0,0,0,0]]
 def subgraph(data):
 	connectmatrix=np.array(data)
 	dim=connectmatrix.shape
@@ -51,34 +51,51 @@ def mtx2list(elem_list,adj_mtx):
 		if elem_i<elem_j:
 			adj_list.append((elem_list[elem_i],elem_list[elem_j]))
 	return adj_list
+
+def degree_count(elem_list,pair_list):
+	mtx=list2mtx(elem_list,pair_list)
+	numnode=mtx.shape[1]
+	connect_dict={}
+	for node in range(0,numnode):
+		connect=int(sum(mtx[node,:]))
+		connect_dict[node]=connect
+	return connect_dict	
 def find_ring(data,mod_mtx_bool=True):
 	connectmatrix=np.array(data)
+	none_zero=np.where(sum(connectmatrix[0:]>0))[0]
+	new_mtx=np.zeros((len(none_zero),len(none_zero)))
+	for (i,ii) in enumerate(none_zero):
+		for (j,jj) in enumerate(none_zero):
+			new_mtx[i,j]=connectmatrix[ii,jj]
+	connectmatrix=new_mtx
 	dim=connectmatrix.shape
 	numnode=dim[1]
 	Node=np.array(range(0,numnode))
-	pair_dict={}
+	pair_list=list()
 	connect_dict={}
 	for node in Node:
-    		currentline=connectmatrix[node,:]
-    		for currentnode in range(0,numnode):
-        		if currentline[currentnode] == 1:
-            			pair_dict.setdefault(node,[]).append(currentnode)
-
+   		currentline=connectmatrix[node,:]
+   		for currentnode in range(0,node):
+   			if currentline[currentnode] == 1:
+				pair_list.append((int(currentnode),int(node)))
 	connect=int()
-	for node in range(0,numnode):
-		if node in pair_dict.keys():
-			connect=len(pair_dict[node])
-		else:
-			connect=0
-		connect_dict.setdefault(node,connect)
-
-	while 1 in connect_dict.values():
+	elem_list=list()
+	for line in pair_list:
+		if line[0] not in elem_list:
+			elem_list.append(line[0])
+		if line[1] not in elem_list:
+			elem_list.append(line[1])
+	connect_dict=degree_count(elem_list,pair_list)
+	print connect_dict
+	while int(1) in connect_dict.values():
 		for n in range(0,numnode):
 			if connect_dict[n]==1:
-				connect_dict[n]=0
-				connect_node=pair_dict[n][0]
-				connect_dict[connect_node]=connect_dict[connect_node]-1
-
+				temp=list()
+				for pair in pair_list:
+					if int(n) not in pair:
+						temp.append(pair)
+				pair_list=temp
+				connect_dict=degree_count(elem_list,pair_list)
 	ring_node=[]
 	for i in connect_dict.keys():
 		if connect_dict[i]>0:
@@ -95,6 +112,8 @@ def find_ring(data,mod_mtx_bool=True):
 		return ring_matrix
 	else:
 		if len(ring_node)>0:
-			return 'ring found'
+			return True 
 		else:
-			return 'ring not found'
+			return False 
+a=np.array(data)
+print find_ring(a,False)
