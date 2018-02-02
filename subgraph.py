@@ -86,7 +86,6 @@ def find_ring(data,mod_mtx_bool=True):
 		if line[1] not in elem_list:
 			elem_list.append(line[1])
 	connect_dict=degree_count(elem_list,pair_list)
-	print connect_dict
 	while int(1) in connect_dict.values():
 		for n in range(0,numnode):
 			if connect_dict[n]==1:
@@ -115,5 +114,3 @@ def find_ring(data,mod_mtx_bool=True):
 			return True 
 		else:
 			return False 
-a=np.array(data)
-print find_ring(a,False)
